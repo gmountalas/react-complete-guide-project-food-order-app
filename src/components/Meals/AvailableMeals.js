@@ -8,26 +8,37 @@ import MealItem from "./MealItem/MealItem";
 const AvailableMeals = () => {
   const [meals, setMeals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [httpError, sethttpError] = useState();
 
   useEffect(() => {
     const fetchMeals = async () => {
-      const response = await axios.get(
-        "https://react-project-809e7-default-rtdb.europe-west1.firebasedatabase.app/meals.json"
-      );
-      const responseData = response.data;
+      try {
+        const response = await axios.get(
+          "https://react-project-809e7-default-rtdb.europe-west1.firebasedatabase.app/meals.json"
+        );
 
-      const loadedMeals = [];
+        const responseData = response.data;
 
-      for (const key in responseData) {
-        loadedMeals.push({
-          id: key,
-          ...responseData[key],
-        });
+        const loadedMeals = [];
+
+        for (const key in responseData) {
+          loadedMeals.push({
+            id: key,
+            ...responseData[key],
+          });
+        }
+
+        setMeals(loadedMeals);
+      } catch (error) {
+        return Promise.reject(error);
       }
-
-      setMeals(loadedMeals);
     };
-    fetchMeals();
+
+    // Call the function and catch any errors
+    fetchMeals().catch((error) => {
+      setIsLoading(false);
+      sethttpError(error.message);
+    });
     setIsLoading(false);
   }, []);
 
@@ -35,6 +46,14 @@ const AvailableMeals = () => {
     return (
       <section className={classes.MealsLoading}>
         <p>Loading...</p>
+      </section>
+    );
+  }
+
+  if (httpError) {
+    return (
+      <section className={classes.MealsError}>
+        <p>{httpError}</p>
       </section>
     );
   }
