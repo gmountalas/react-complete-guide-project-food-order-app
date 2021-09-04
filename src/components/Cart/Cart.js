@@ -5,6 +5,7 @@ import classes from "./Cart.module.css";
 import CartContext from "../../store/cart-context";
 import Checkout from "./Checkout";
 import { useState } from "react";
+import axios from "axios";
 
 const Cart = (props) => {
   const [isCheckout, setIsCheckout] = useState(false);
@@ -22,6 +23,13 @@ const Cart = (props) => {
 
   const orderHandler = () => {
     setIsCheckout(true);
+  };
+
+  const submitOrderHandler = (userData) => {
+    axios.post(
+      "https://react-project-809e7-default-rtdb.europe-west1.firebasedatabase.app/orders.json",
+      { user: userData, orderedItems: cartCtx.items }
+    );
   };
 
   const cartItems = (
@@ -59,7 +67,9 @@ const Cart = (props) => {
         <span>Total Amount</span>
         <span>{totalAmount}</span>
       </div>
-      {isCheckout && <Checkout onCancel={props.onClose} />}
+      {isCheckout && (
+        <Checkout onConfirm={submitOrderHandler} onCancel={props.onClose} />
+      )}
       {!isCheckout && modalActions}
     </Modal>
   );
